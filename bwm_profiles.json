@@ -1,0 +1,52 @@
+{
+  "version": "RG-POC-2026.07-v1",
+  "scale": "BWM 1-9",
+  "profiles": {
+    "data_thin": {
+      "top_level": {
+        "criteria": ["Credit", "ESG"],
+        "best": "Credit",
+        "worst": "ESG",
+        "best_to_others": [1, 2],
+        "others_to_worst": [2, 1]
+      },
+      "credit": {
+        "criteria": ["Character", "Capacity", "Capital", "Condition", "Collateral"],
+        "best": "Character",
+        "worst": "Collateral",
+        "best_to_others": [1, 3, 4, 3, 6],
+        "others_to_worst": [6, 3, 2, 3, 1]
+      },
+      "esg": {
+        "criteria": ["Environmental", "Social", "Governance"],
+        "best": "Social",
+        "worst": "Governance",
+        "best_to_others": [2, 1, 3],
+        "others_to_worst": [2, 3, 1]
+      }
+    },
+    "data_rich": {
+      "top_level": {
+        "criteria": ["Credit", "ESG"],
+        "best": "ESG",
+        "worst": "Credit",
+        "best_to_others": [2, 1],
+        "others_to_worst": [1, 2]
+      },
+      "credit": {
+        "criteria": ["Character", "Capacity", "Capital", "Condition", "Collateral"],
+        "best": "Capacity",
+        "worst": "Collateral",
+        "best_to_others": [3, 1, 2, 3, 4],
+        "others_to_worst": [2, 4, 3, 2, 1]
+      },
+      "esg": {
+        "criteria": ["Environmental", "Social", "Governance"],
+        "best": "Social",
+        "worst": "Governance",
+        "best_to_others": [2, 1, 3],
+        "others_to_worst": [2, 3, 1]
+      }
+    }
+  }
+}
