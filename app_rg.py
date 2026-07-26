@@ -322,7 +322,15 @@ st.set_page_config(page_title="BCS-ESG System", page_icon=":material/analytics:"
 # ============================================================
 # SESSION STATE
 # ============================================================
-for k, v in [("page","login"),("view","dashboard"),("res",None),("loading",False),("load_step",0)]:
+for k, v in [
+    ("page","login"),
+    ("view","dashboard"),
+    ("res",None),
+    ("loading",False),
+    ("load_step",0),
+    ("demo_guide_seen",False),
+    ("demo_guide_requested",False),
+]:
     if k not in st.session_state: st.session_state[k] = v
 
 # ============================================================
@@ -338,6 +346,77 @@ DB = {
     "3374010101010004": {"nama":"Tirta Wahyu","usaha":"Agribisnis (klaim lahan)","lokasi":"Lokasi belum terverifikasi","alamat":"Demak, Jawa Tengah","id_type":"KTP","id_no":"3321 **** **** 0004","tgl_lahir":"09 Sep 1991","sejak":"Klaim 2022","activity_type":"agri","data_availability":{"transaction_history":False,"digital_payments":False,"financial_statements":False,"credit_bureau":False},"5C":[10,35,35,30,8],"ESG":[18,25,12],"lat":-6.8901,"lng":110.6400,
         "geo":{"ndvi":0.11,"ndvi_label":"Lahan gundul / non-vegetasi","proximity_m":5200,"proximity_poi":"Pasar terdekat","road_m":1800,"building_verified":False,"building_count":0,"flood_risk":"Tinggi","flood_score":31,"land_use":"Lahan kosong / tidak teridentifikasi","land_class":"empty","protected_zone_ok":False,"ntl":0.6,"ntl_label":"Nyaris nol","claim":"Lahan pertanian produktif","claim_match":False}},
 }
+
+
+def close_demo_guide():
+    """Tutup panduan dan cegah dialog terbuka kembali pada sesi yang sama."""
+    st.session_state.demo_guide_seen = True
+    st.session_state.demo_guide_requested = False
+
+
+@st.dialog(
+    "Akun demo siap digunakan",
+    width="large",
+    dismissible=True,
+    icon=":material/account_circle:",
+    on_dismiss=close_demo_guide,
+)
+def render_demo_guide():
+    st.markdown(
+        """
+        <section class="demo-guide-hero">
+            <div class="demo-guide-kicker">Panduan singkat untuk dewan juri</div>
+            <h2>Jelajahi prototipe tanpa memasukkan NIK pribadi.</h2>
+            <p>
+                Empat profil simulasi telah disiapkan pada halaman masuk.
+                Tutup panduan ini, lalu pilih salah satu tombol profil untuk
+                membuka <i>workspace</i> penilaian secara langsung.
+            </p>
+        </section>
+        <div class="demo-guide-flow" aria-label="Alur penggunaan akun demo">
+            <span><b>1</b> Tutup panduan</span>
+            <i aria-hidden="true"></i>
+            <span><b>2</b> Pilih profil simulasi</span>
+            <i aria-hidden="true"></i>
+            <span><b>3</b> Tinjau hasil analisis</span>
+        </div>
+        <div class="demo-guide-grid">
+            <article class="demo-profile-card is-amber">
+                <div class="demo-profile-tag">Data-Thin · 1/4 data</div>
+                <h3>Geovany Bramanthya</h3>
+                <p>Petani kopi sebagai skenario inklusi debitur dengan data terbatas.</p>
+            </article>
+            <article class="demo-profile-card is-teal">
+                <div class="demo-profile-tag">Data-Rich · 4/4 data</div>
+                <h3>Salma Aulia</h3>
+                <p>Toko daring sebagai pembanding dengan ketersediaan data lengkap.</p>
+            </article>
+            <article class="demo-profile-card is-violet">
+                <div class="demo-profile-tag">Data-Thin · 1/4 data</div>
+                <h3>Reva Adinda</h3>
+                <p>Pengrajin rural untuk melihat penilaian yang tetap kontekstual.</p>
+            </article>
+            <article class="demo-profile-card is-red">
+                <div class="demo-profile-tag">Verifikasi klaim · 0/4 data</div>
+                <h3>Tirta Wahyu</h3>
+                <p>Skenario kontradiksi bukti yang diarahkan ke tinjauan manusia.</p>
+            </article>
+        </div>
+        <div class="demo-guide-note">
+            Seluruh identitas, data, skor, dan hasil pada prototipe merupakan simulasi akademik.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    if st.button(
+        "Lihat profil demo",
+        key="close_demo_guide",
+        type="primary",
+        width="stretch",
+    ):
+        close_demo_guide()
+        st.rerun()
+
 
 AVATAR_BY_NIK = {
     "3374010101010001": "geovany",
@@ -683,6 +762,171 @@ section[data-testid="stSidebar"]{ display:none !important; }
 [data-testid="stVerticalBlockBorderWrapper"] > div[data-testid="stVerticalBlock"]{ padding:36px 32px !important; }
 .demo-chip{ }
 
+/* ======= DEMO ACCOUNT GUIDE ======= */
+[data-testid="stDialog"] div[role="dialog"]{
+  overflow:hidden !important;
+  color:#15213d !important;
+  background:linear-gradient(145deg,rgba(255,255,255,.99),#edf4fa) !important;
+  border:1px solid rgba(255,255,255,.96) !important;
+  border-radius:28px !important;
+  box-shadow:
+    -10px -10px 24px rgba(255,255,255,.78),
+    18px 24px 58px rgba(35,56,91,.22),
+    inset 1px 1px 0 rgba(255,255,255,.92) !important;
+  animation:demoGuideIn .28s cubic-bezier(.2,.75,.3,1) both;
+}
+[data-testid="stDialog"] div[role="dialog"] > div{
+  background:transparent !important;
+}
+[data-testid="stDialog"] h2,
+[data-testid="stDialog"] h3,
+[data-testid="stDialog"] p{
+  color:inherit !important;
+  -webkit-text-fill-color:currentColor !important;
+}
+.demo-guide-hero{
+  position:relative;
+  overflow:hidden;
+  padding:21px 23px 20px;
+  border:1px solid rgba(255,255,255,.92);
+  border-radius:22px;
+  background:
+    radial-gradient(circle at 92% 12%,rgba(49,200,191,.20),transparent 30%),
+    linear-gradient(135deg,#f8fbff,#eaf2fb);
+  box-shadow:
+    -5px -5px 12px rgba(255,255,255,.90),
+    7px 9px 20px rgba(60,84,119,.12),
+    inset 1px 1px 0 rgba(255,255,255,.90);
+}
+.demo-guide-hero::after{
+  content:"";
+  position:absolute;
+  width:130px;
+  height:130px;
+  right:-58px;
+  bottom:-72px;
+  border-radius:50%;
+  border:1px solid rgba(102,88,216,.16);
+  box-shadow:0 0 0 18px rgba(102,88,216,.04),0 0 0 36px rgba(102,88,216,.025);
+}
+.demo-guide-kicker{
+  margin-bottom:8px;
+  color:#087a68 !important;
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+}
+.demo-guide-hero h2{
+  position:relative;
+  z-index:1;
+  margin:0 !important;
+  max-width:620px;
+  color:#15213d !important;
+  font-size:24px !important;
+  font-weight:800 !important;
+  line-height:1.18 !important;
+  letter-spacing:-.55px !important;
+}
+.demo-guide-hero p{
+  position:relative;
+  z-index:1;
+  max-width:640px;
+  margin:10px 0 0 !important;
+  color:#5e6f88 !important;
+  font-size:12.5px !important;
+  line-height:1.62 !important;
+}
+.demo-guide-flow{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  margin:18px 4px 16px;
+  color:#52627b;
+  font-size:10.5px;
+  font-weight:700;
+}
+.demo-guide-flow span{ display:flex;align-items:center;gap:6px;white-space:nowrap; }
+.demo-guide-flow b{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:22px;
+  height:22px;
+  border-radius:8px;
+  color:#fff;
+  background:linear-gradient(135deg,#14306e,#6658d8);
+  box-shadow:0 5px 10px rgba(70,62,173,.20);
+}
+.demo-guide-flow i{
+  width:28px;
+  height:1px;
+  background:linear-gradient(90deg,#cbd5e3,#9dabbe);
+}
+.demo-guide-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:11px;
+}
+.demo-profile-card{
+  position:relative;
+  overflow:hidden;
+  min-height:118px;
+  padding:15px 16px;
+  border:1px solid rgba(255,255,255,.92);
+  border-radius:18px;
+  background:linear-gradient(145deg,#ffffff,#eef4fa);
+  box-shadow:
+    -4px -4px 10px rgba(255,255,255,.88),
+    6px 8px 16px rgba(59,82,115,.11),
+    inset 1px 1px 0 rgba(255,255,255,.84);
+}
+.demo-profile-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:var(--demo-color);
+}
+.demo-profile-card.is-amber{ --demo-color:#c2761a; }
+.demo-profile-card.is-teal{ --demo-color:#0f9d6b; }
+.demo-profile-card.is-violet{ --demo-color:#6658d8; }
+.demo-profile-card.is-red{ --demo-color:#c94a4a; }
+.demo-profile-tag{
+  color:var(--demo-color);
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  font-weight:800;
+  letter-spacing:.45px;
+  text-transform:uppercase;
+}
+.demo-profile-card h3{
+  margin:7px 0 4px !important;
+  color:#15213d !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  line-height:1.25 !important;
+}
+.demo-profile-card p{
+  margin:0 !important;
+  color:#66758d !important;
+  font-size:10.5px !important;
+  line-height:1.48 !important;
+}
+.demo-guide-note{
+  margin:14px 2px 4px;
+  color:#71809a;
+  font-size:9.5px;
+  line-height:1.5;
+  text-align:center;
+}
+@keyframes demoGuideIn{
+  from{ opacity:0;transform:translateY(10px) scale(.985); }
+  to{ opacity:1;transform:translateY(0) scale(1); }
+}
+
 /* ======= ANIMATIONS ======= */
 @keyframes fadeUp{ from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
 @keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
@@ -748,6 +992,12 @@ section[data-testid="stSidebar"]{ display:none !important; }
   .hero-strip{ align-items:flex-start; flex-direction:column; }
   .hero-meta{ width:100%; }
   .hero-pill{ flex:1; text-align:center; }
+}
+@media (max-width:640px){
+  .demo-guide-grid{ grid-template-columns:1fr; }
+  .demo-guide-flow{ align-items:flex-start; flex-direction:column; }
+  .demo-guide-flow i{ display:none; }
+  .demo-guide-hero h2{ font-size:21px !important; }
 }
 @media (prefers-reduced-motion:reduce){
   *, *::before, *::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
@@ -1143,6 +1393,9 @@ def render_right_panel(d, vi, esg, fcs, thin, avatar_key="geovany"):
 if st.session_state.page == "login":
     # Restored framing from the first split-screen version.
     st.markdown('<style>.block-container{padding:32px 28px 34px !important}</style>', unsafe_allow_html=True)
+    if not st.session_state.demo_guide_seen or st.session_state.demo_guide_requested:
+        render_demo_guide()
+
     fcol, _gap, artcol = st.columns([0.92, 0.05, 1.12], gap="small")
 
     with fcol:
@@ -1178,6 +1431,9 @@ if st.session_state.page == "login":
                     st.markdown(f'<div class="login-feedback is-warning">{icon("alert", 15)}<span>Masukkan NIK terlebih dahulu.</span></div>', unsafe_allow_html=True)
 
             st.markdown(f'<div class="login-meta-row" style="color:#5e6f88 !important">{icon("lock", 14)} <span>Data simulasi tersimpan lokal dan keputusan akhir tetap berada pada analis manusia.</span></div>', unsafe_allow_html=True)
+            if st.button("Panduan akun demo", key="open_demo_guide", type="secondary", width="stretch"):
+                st.session_state.demo_guide_requested = True
+                st.rerun()
             st.markdown('<div class="login-divider" style="color:#8796aa !important">Profil simulasi</div>', unsafe_allow_html=True)
             st.markdown('<div class="login-demo-title" style="color:#5e6f88 !important">Pilih salah satu profil untuk mencoba alur penilaian tanpa memasukkan NIK manual.</div>', unsafe_allow_html=True)
 
